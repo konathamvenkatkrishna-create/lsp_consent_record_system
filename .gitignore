@@ -1,0 +1,17 @@
+  # --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+
+# --- Virtual Environment ---
+MYVENV/
+venv/
+env/
+.venv/
+
+# --- Environment Variables ---
+.env
+*.env
