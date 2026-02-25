@@ -49,4 +49,3 @@ class ConsentRepository:
         db.commit()
         return record
 
-    

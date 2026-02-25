@@ -32,3 +32,5 @@ def revoke_consent(db: Session, data):
     )
 
     return {"message": "revoked"}
+
+

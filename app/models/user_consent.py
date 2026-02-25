@@ -1,17 +1,26 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
-from datetime import datetime
+from sqlalchemy import Column, BigInteger, String, Boolean, DateTime, ForeignKey, Index
+from sqlalchemy.sql import func
 from app.core.db import Base
 
 class UserConsent(Base):
     __tablename__ = "user_consent"
 
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, nullable=False)
-    consent_type = Column(String, nullable=False)
-    version = Column(String, nullable=False)
-    accepted = Column(Boolean, default=True)
-    scroll_completed = Column(Boolean, default=False)
-    device_info = Column(String)
-    ip_address = Column(String)
-    accepted_at = Column(DateTime)
-    revoked_at = Column(DateTime, nullable=True)
+    id = Column(BigInteger, primary_key=True)
+
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+
+    consent_type = Column(String(50), nullable=False)
+    version = Column(String(20), nullable=False)
+
+    accepted = Column(Boolean, nullable=False)
+    scroll_completed = Column(Boolean, nullable=False)
+
+    device_info = Column(String(255))
+    ip_address = Column(String(50))
+
+    accepted_at = Column(DateTime(timezone=True), server_default=func.now())
+    revoked_at = Column(DateTime(timezone=True), nullable=True)
+
+    __table_args__ = (
+        Index("idx_user_consent_user_id", "user_id"),
+    )
