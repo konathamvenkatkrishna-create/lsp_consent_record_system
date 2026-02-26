@@ -18,7 +18,7 @@ def record_consent(
     db: Session = Depends(get_db)
 ):
 
-    #  Check user exists (Module 1 integration safe)
+
     user_exists = db.query(User).filter(User.id == payload.user_id).first()
     if not user_exists:
         raise HTTPException(
