@@ -18,7 +18,7 @@ class UserConsent(Base):
     device_info = Column(String(255))
     ip_address = Column(String(50))
 
-    accepted_at = Column(DateTime(timezone=True), server_default=func.now())
+    accepted_at = Column(DateTime(timezone=True), server_default=func.now(),nullable=False)
     revoked_at = Column(DateTime(timezone=True), nullable=True)
 
     __table_args__ = (

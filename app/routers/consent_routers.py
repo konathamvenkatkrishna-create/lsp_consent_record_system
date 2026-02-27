@@ -1,5 +1,7 @@
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy import Column, DateTime, func
+from sqlalchemy import Column
 from sqlalchemy.orm import Session
 from app.models.audit_logs import AuditLog
 from app.models.consent_master import ConsentMaster
@@ -73,8 +75,10 @@ def record_consent(
         accepted=True,
         scroll_completed=True,
         device_info=payload.device_info,
-        ip_address=request.client.host
-    )
+        ip_address=request.client.host,
+        accepted_at =datetime
+)
+    
 
     db.add(consent)
     db.commit()
@@ -150,4 +154,39 @@ def revoke_consent(
     return {
         "message": "Consent Revoked Successfully",
         "consent_id": consent.id
+    }
+
+@router.get("/status")
+def check_consent_status(
+    user_id: int,
+    consent_type: str,
+    db: Session = Depends(get_db)
+):
+    
+    # Check if user exists
+    user_exists = db.query(User).filter(User.id == user_id).first()
+    if not user_exists:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
+
+    # Find latest active consent
+    consent = db.query(UserConsent).filter(
+        UserConsent.user_id == user_id,
+        UserConsent.consent_type == consent_type,
+        UserConsent.revoked_at.is_(None)
+    ).order_by(UserConsent.accepted_at.desc()).first()
+
+    if not consent:
+        return {
+            "active": False,
+            "message": "No active consent found"
+        }
+
+    return {
+        "active": True,
+        "version": consent.version,
+        "accepted_at": consent.accepted_at,
+        "revoked_at": consent.revoked_at
     }
