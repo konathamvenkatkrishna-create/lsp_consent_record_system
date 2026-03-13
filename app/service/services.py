@@ -13,7 +13,7 @@ def record_consent(db: Session, data):
         user_id=data.user_id,
         details=f"{data.consent_type} v{data.version}"
     )
-
+      
     return new_consent
 
 def revoke_consent(db: Session, data):

@@ -76,12 +76,10 @@ def record_consent(
         scroll_completed=True,
         device_info=payload.device_info,
         ip_address=request.client.host,
-        accepted_at =datetime
-)
-    
+        accepted_at =datetime.utcnow()
+    )
 
     db.add(consent)
-    db.commit()
     db.refresh(consent)
 
     #  Audit log

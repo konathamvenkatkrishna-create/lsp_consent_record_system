@@ -37,8 +37,7 @@ class ConsentRepository:
             db.query(UserConsent)
             .filter(
                 UserConsent.user_id == user_id,
-                UserConsent.consent_type == consent_type,
-                UserConsent.revoked_at.is_(None)
+                UserConsent.consent_type == consent_type
             )
             .first()
         )
