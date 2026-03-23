@@ -7,11 +7,10 @@ from app.models.audit_logs import AuditLog
 from app.models.consent_master import ConsentMaster
 from app.models.users import User
 from app.models.user_consent import UserConsent
-from app.schemas.schema import UserConsentRequest, RevokeConsentRequest
+from app.schemas.schema import UserConsentRequest
 from app.core.db import get_db
 
 router = APIRouter(prefix="/api/v1/consent", tags=["Consent"])
-
 
 @router.post("/record")
 def record_consent(
@@ -28,21 +27,18 @@ def record_consent(
             detail="Invalid user_id. User does not exist."
         )
 
-    # Scroll validation
     if not payload.scroll_completed:
         raise HTTPException(
             status_code=400,
             detail="Please scroll through the entire document before accepting."
         )
 
-    # Explicit acceptance check
     if not payload.accepted:
         raise HTTPException(
             status_code=400,
             detail="Consent not provided. Please accept to continue."
         )
 
-    # Prevent duplicate active consent
     existing = db.query(UserConsent).filter(
         UserConsent.user_id == payload.user_id,
         UserConsent.consent_type == payload.consent_type,
@@ -54,8 +50,6 @@ def record_consent(
             status_code=400,
             detail="Active consent already exists for this type."
         )
-
-    #  Get latest version from ConsentMaster
     latest_doc = db.query(ConsentMaster).filter(
         ConsentMaster.type == payload.consent_type,
         ConsentMaster.active == True
@@ -66,8 +60,6 @@ def record_consent(
             status_code=404,
             detail="Consent document not found."
         )
-
-    # Create consent
     consent = UserConsent(
         user_id=payload.user_id,
         consent_type=payload.consent_type,
@@ -82,7 +74,6 @@ def record_consent(
     db.add(consent)
     db.refresh(consent)
 
-    #  Audit log
     audit = AuditLog(
         action="CONSENT_ACCEPTED",
         user_id=payload.user_id,
